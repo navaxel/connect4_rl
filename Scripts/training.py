@@ -4,7 +4,7 @@ import torch
 import matplotlib.pyplot as plt
 from Scripts.Deep_Q_Learning import NetworkB,DQN
 
-def train_agent(env, agent_to_train, agent_to_play_against, n_player=1, epochs=3000, rows=6, cols=7, sync_freq=10, display_info=False, save=True, path_to_save="", name="model_trained"):
+def train_agent(env, agent_to_train, agent_to_play_against, n_player=1, epochs=3000, rows=6, cols=7, sync_freq=10, display_info=False, save=False, path_to_save="", name="model_trained"):
     env.reset()
 
     if(n_player ==1):
