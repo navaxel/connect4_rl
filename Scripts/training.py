@@ -4,7 +4,7 @@ import torch
 import matplotlib.pyplot as plt
 from Scripts.Deep_Q_Learning import NetworkB,DQN
 
-def train_agent(env,agent_to_train,agent_to_play_against,n_player = 1,epoch = 3000,rows = 6, cols = 7,sync_freq = 10,display_info = False):
+def train_agent(env, agent_to_train, agent_to_play_against, n_player=1, epochs=3000, rows=6, cols=7, sync_freq=10, display_info=False, save=True, path_to_save="", name="model_trained"):
     env.reset()
 
     if(n_player ==1):
@@ -12,7 +12,7 @@ def train_agent(env,agent_to_train,agent_to_play_against,n_player = 1,epoch = 30
     else:
         trainer = env.train([agent_to_play_against,None])
 
-    for i in range(1, epoch):
+    for i in range(1, epochs):
         state, info = env.reset()
         state = state["observation"]["board"]
         state = np.reshape(state, [1, rows, cols])
@@ -44,10 +44,16 @@ def train_agent(env,agent_to_train,agent_to_play_against,n_player = 1,epoch = 30
                 if i%10==0 and display_info :
                     print("Episode {} Average Reward {} Last Reward {} Epsilon {}".format(i, average_reward1/i,  score, agent_to_train.returning_epsilon()))
                 break
+
+        if save:
+            save_agent(agent_to_train, path_to_save, name, epochs)
             
     return agent_to_train
 
-def save_agent(agent,PATH_TO_SAVE):
+def save_agent(agent, path_to_save, name, epochs):
+    torch.save({'model_state_dict': agent.network.state_dict(),
+        'optimizer_state_dict': agent.network.optimizer.state_dict(),
+        'epoch': epochs}, path_to_save + name + ".pt")
     return None
 
 def load_agent(PATH_TO_LOAD):
