@@ -20,9 +20,10 @@ def train_agent(env, agent_to_train, agent_to_play_against, n_player=1, epochs=3
         j = 0
         while True:
             j+=1
-
+            print('state: ',state)
             action = agent_to_train.choose_action(state)
             state_, reward, done, info = trainer.step(action)
+            
             if reward == None :
                 reward = -1000
             state_ = state_["board"]
@@ -43,6 +44,63 @@ def train_agent(env, agent_to_train, agent_to_play_against, n_player=1, epochs=3
                 average_reward1 = score 
                 if i%10==0 and display_info :
                     print("Episode {} Average Reward {} Last Reward {} Epsilon {}".format(i, average_reward1/i,  score, agent_to_train.returning_epsilon()))
+                break
+
+        if save:
+            save_agent(agent_to_train, path_to_save, name, epochs)
+            
+    return agent_to_train
+
+
+def train_adversial_agent(env, agent_to_train, agent_to_play_against, n_player=1, epochs=3000, rows=6, cols=7, sync_freq=10, display_info=False, save=False, path_to_save="", name="model_trained"):
+    env.reset()
+
+    if(n_player ==1):
+        trainer = env.train([None,agent_to_play_against])
+    else:
+        trainer = env.train([agent_to_play_against,None])
+
+    nb_win = 0
+    score = 0
+
+    for i in range(1, epochs):
+        state, info = env.reset()
+        state = state["observation"]["board"]
+        state = np.reshape(state, [1, rows, cols])
+        
+        j = 0
+    
+        while True:
+            j+=1
+
+            action1 = agent_to_train.choose_action(state)
+            intermediary_state = np.array([np.array(env.step([action1, None])[0]["observation"]["board"]).reshape((rows, cols))])
+            if not env.done:
+                action2 = agent_to_play_against.choose_action(intermediary_state)
+                after_step = env.step([None, action2])[0]
+                #state_, reward, done, info = after_step['observation']['board'], after_step['reward'], env.done, after_step['info'] 
+
+            state_, reward, done, info = env.state[0]['observation']['board'], env.state[0]['reward'], env.done, env.state[0]['info'] 
+            state_ = np.reshape(state_, [1, rows, cols])
+            state = torch.tensor(state).float()
+            state_ = torch.tensor(state_).float()
+
+            exp = (state, action1, reward, state_, done)
+            agent_to_train.replay.add(exp)
+            agent_to_train.learn()
+            state = state_
+            score += reward
+
+            if j % sync_freq == 0:
+                agent_to_train.network2.load_state_dict(agent_to_train.network.state_dict())
+
+            if done:
+                if reward == 1:
+                    nb_win += 1
+                if i%10==0 and display_info :
+                    print("total_score :", score)
+                    print("Episode {} Average Reward {} Nb Win {} Epsilon {}".format(i, score/i, nb_win, agent_to_train.returning_epsilon()))
+                    nb_win = 0
                 break
 
         if save:
