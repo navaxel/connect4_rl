@@ -1,5 +1,8 @@
 import numpy as np
 def test_agent(env,agent_to_test,agent_against,n_player = 1,nb_games = 100,rows = 6,cols = 7):
+
+    exploration_rate = agent_to_test.exploration_rate
+    agent_to_test.exploration_rate = 0
     observation, info = env.reset()
     observation = observation["observation"]
 
@@ -27,4 +30,6 @@ def test_agent(env,agent_to_test,agent_against,n_player = 1,nb_games = 100,rows 
         action = agent_to_test.choose_action(np.reshape(observation["board"], [1, rows, cols]),test = True)
         observation, reward, done, info = trainer.step(action)
 
+    agent_to_test.exploration_rate = exploration_rate
+    
     return history
