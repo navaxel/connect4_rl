@@ -77,7 +77,7 @@ class MCTS():
     self.time_limit = self.config.timeout - 0.3
     self.root_node = (0,)
     self.tunable_constant = 1.0
-    self.game_training = 50
+    self.game_training = 100
 
     self.tree = {self.root_node:{'state':self.state, 'player':self.player,
                             'child':[], 'parent': None, 'total_node_visits':0,
@@ -233,8 +233,8 @@ class MCTS():
       winner = self.simulation(node_id)
       nbr_game += 1
       self.backpropagation(node_id, winner)
-      #if (nbr_game % 10 ==0):
-        #print('The',nbr_game,'th game has been played ! \n')
+      if (nbr_game % 9 ==0):
+        print('The',nbr_game,'th game has been played ! \n')
 
     current_state_node_id = (0,)
     action_candidates = self.tree[current_state_node_id]['child']
