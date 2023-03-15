@@ -1,5 +1,6 @@
 import numpy as np
 
+from copy import deepcopy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -80,6 +81,34 @@ class NetworkB(torch.nn.Module):
         x = self.fc_layers(x)
         #x = x.mean(dim=1)
         return x
+    
+
+class NetworkC(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv_layer = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=128, kernel_size=4),
+            nn.ReLU()
+        )
+        
+        self.fc_layers = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(1536, 64),
+            nn.ReLU(),
+            nn.Linear(64, 64),
+            nn.ReLU(),
+            nn.Linear(64, 1)
+        )
+        self.optimizer = optim.Adam(self.parameters(), lr=LR)
+        self.loss = nn.MSELoss()
+        
+        
+    def forward(self, x):
+        x = self.conv_layer(x)
+        x = self.fc_layers(x)
+        #x = x.mean(dim=1)
+        return x
+    
 class ReplayBuffer:
     def __init__(self):
         self.memory = deque(maxlen=MEM_SIZE)
@@ -100,7 +129,7 @@ class ReplayBuffer:
 
         return (state1_batch, action_batch, reward_batch, state2_batch, done_batch)
 class DQN:
-    def __init__(self, network=NetworkB()):
+    def __init__(self, network=NetworkC()):
         self.replay = ReplayBuffer()
         self.exploration_rate = EXPLORATION_MAX
         self.network = network
@@ -108,33 +137,69 @@ class DQN:
         self.network2.load_state_dict(self.network.state_dict())
 
 
-    def choose_action(self, observation,test = False):
+    # def choose_action(self, observation,test = False):
         
-        # Convert observation to PyTorch Tensor
-        state = torch.tensor(observation).float().detach()
-        #state = state.to(DEVICE)
-        state = state.unsqueeze(0)
-        possible_actions = list(np.where(state.numpy()[0][0][0] == 0)[0])
+    #     # Convert observation to PyTorch Tensor
+    #     state = torch.tensor(observation).float().detach()
+    #     #state = state.to(DEVICE)
+    #     state = state.unsqueeze(0)
+    #     possible_actions = list(np.where(state.numpy()[0][0][0] == 0)[0])
         
-        if random.random() < self.exploration_rate and not test:
+    #     if random.random() < self.exploration_rate and not test:
+    #         random.choice(possible_actions)
+   
+    #     ### BEGIN SOLUTION ###
+
+    #     # Get Q(s,.)
+        
+    #     q_values = self.network(state)
+
+    #     # Choose the action to play    
+        
+        
+    #     # action = torch.argmax(q_values).item()
+    #     # return action 
+        
+    #     ### END SOLUTION ###
+
+    #     action = torch.argmax(q_values[0,possible_actions]).item()
+    #     return int(possible_actions[action])
+    
+
+    def play_a_move(self, state, action, player_id):
+        height = state.shape[1]
+        for i in reversed(range(height)):
+            if state[0][i][action] == 0:
+                state[0][i][action] = player_id
+                return state
+        
+        return state
+    
+
+    def choose_action(self, player_id, state, env):
+        
+        possible_actions = list(np.where(state[0][0] == 0)[0])
+        
+        if random.random() < self.exploration_rate:
             random.choice(possible_actions)
    
         ### BEGIN SOLUTION ###
 
-        # Get Q(s,.)
+        # Get V(s) and Choose the action to play    
+        next_values = dict()
+        for action in possible_actions: 
+            # new_env = deepcopy(env)
+            # if player_id == 1:
+            #     next_state = np.reshape(new_env.step([action, None])[0]["observation"]["board"], [1, rows, cols])
+            # else:
+            #     next_state = np.reshape(new_env.step([None, action])[0]["observation"]["board"], [1, rows, cols])
+            # print('next state: ', next_state)
+            next_state = self.play_a_move(state, action, player_id)
+            next_state_value = self.network(torch.tensor(next_state).float().unsqueeze(0))
+            next_values[action] = next_state_value
         
-        q_values = self.network(state)
-
-        # Choose the action to play    
-        
-        
-        # action = torch.argmax(q_values).item()
-        # return action 
-        
-        ### END SOLUTION ###
-
-        action = torch.argmax(q_values[0,possible_actions]).item()
-        return int(possible_actions[action])
+        action = max(next_values, key=next_values.get)
+        return int(action)
 
 
     def learn(self):
@@ -161,13 +226,13 @@ class DQN:
         predicted_value_of_future = torch.max(next_q_values, dim=1)[0]
 
         # Compute the q_target
-        q_target = reward_batch + GAMMA * predicted_value_of_future * (1-(done_batch).long())
+        q_target = predicted_value_of_now + LR * (reward_batch + GAMMA * predicted_value_of_future - predicted_value_of_now)
 
         # Compute the loss (c.f. self.network.loss())
         loss = self.network.loss(q_target, predicted_value_of_now)
 
         ### END SOLUTION ###
-
+            
         # Complute 𝛁Q
         self.network.optimizer.zero_grad()
         loss.backward()

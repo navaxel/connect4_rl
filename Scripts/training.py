@@ -107,6 +107,7 @@ def train_adversial_agent(env, agent_to_train, agent_to_play_against, n_player=1
                 agent_to_train.network2.load_state_dict(agent_to_train.network.state_dict())
 
             if done:
+                
                 if reward == 1:
                     nb_win += 1
                 if i%10==0 and display_info :
