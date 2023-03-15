@@ -78,7 +78,7 @@ def train_adversial_agent(env, agent_to_train, agent_to_play_against, n_player=1
             if n_player == 1:
                 intermediary_state = np.reshape(env.step([trained_action, None])[0]["observation"]["board"], [1, rows, cols])
             else :
-                intermediary_state = np.reshape(env.step([trained_action, None])[0]["observation"]["board"], [1, rows, cols])
+                intermediary_state = np.reshape(env.step([None, trained_action])[0]["observation"]["board"], [1, rows, cols])
                 
             if not env.done:
                 action_against = agent_to_play_against.choose_action(intermediary_state)

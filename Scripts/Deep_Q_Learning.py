@@ -31,7 +31,7 @@ BATCH_SIZE = 64
 GAMMA = 0.95
 EXPLORATION_MAX = 0.1
 EXPLORATION_DECAY = 1.0
-EXPLORATION_MIN = 0.001
+EXPLORATION_MIN = 0.1
 sync_freq = 10
 
 class Network(torch.nn.Module):
