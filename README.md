@@ -20,6 +20,6 @@ Contains various python scripts used for the training of our agent and the MCTS 
 ### Notebooks for testing
 
 The project also contains three notebooks: \
--one where the agent is only trained against a random player
--one where the agent is only trained against a MCTS player
+-one where the agent is only trained against a random player \
+-one where the agent is only trained against a MCTS player \
 -one where the agent firstly learns with a random player then against a copy of himself
