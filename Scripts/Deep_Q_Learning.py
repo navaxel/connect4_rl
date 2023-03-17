@@ -55,7 +55,10 @@ class Network(torch.nn.Module):
         x = self.fc3(x)
 
         return x
+    
+"""The best working network
 
+"""
 class NetworkB(torch.nn.Module):
     def __init__(self):
         super().__init__()
@@ -128,6 +131,8 @@ class ReplayBuffer:
         done_batch = torch.tensor([d for (s1,a,r,s2,d) in minibatch])
 
         return (state1_batch, action_batch, reward_batch, state2_batch, done_batch)
+"""Class of the Deep Q-learning execution 
+"""
 class DQN:
     def __init__(self, network=NetworkC()):
         self.replay = ReplayBuffer()

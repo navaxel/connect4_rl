@@ -54,6 +54,8 @@ def test_agent(env,agent_to_test,agent_against,n_player = 1,nb_games = 100,rows 
     
     return history
 
+"""Final version of testing against an existing policy
+"""
 def new_testing(env,agent_to_test,agent_against,n_player = 1,nb_games = 100,rows = 6,cols = 7):
     history = {1:0, -1:0, None:0, 0:0}
     exploration_rate = agent_to_test.exploration_rate

@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from Scripts.Deep_Q_Learning import NetworkB,DQN
 
 discount_factor = 0.9
-
+"""Function to self train the agent against another neural network
+"""
 def train_adversial_agent(env, agent_to_train, agent_to_play_against, n_player=1, epochs=3000, rows=6, cols=7, sync_freq=10, display_info=False, save=False, path_to_save="", name="model_trained"):
     env.reset()
 
@@ -78,7 +79,7 @@ def train_adversial_agent(env, agent_to_train, agent_to_play_against, n_player=1
                 score += reward
                 if reward > 0:
                     nb_win += 1
-                if i%500==0 and display_info :
+                if i%50==0 and display_info :
                     print("Episode {} Average Reward {} Nb Win {} Epsilon {}".format(i, score/i, nb_win, agent_to_train.returning_epsilon()))
            
                 break
@@ -89,6 +90,10 @@ def train_adversial_agent(env, agent_to_train, agent_to_play_against, n_player=1
             save_agent(agent_to_train, path_to_save, name, epochs)
             
     return agent_to_train
+
+
+"""Function to train against an existing strategy MCTS, negamax and random
+"""
 
 def train_agent(env, agent_to_train, agent_to_play_against, n_player=1, epochs=3000, rows=6, cols=7, sync_freq=10, display_info=False, save=False, path_to_save="", name="model_trained"):
     env.reset()
