@@ -19,4 +19,8 @@
 
  ### Notebooks for testing
  
+ The project also contains three notebooks: \
+ -one to illustrate how the MCTS agent is trained and functions \
+ -one where the agent firstly learns with a random player then against a copy of himself, which has been our training strategy
+ 
  
