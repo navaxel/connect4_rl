@@ -219,7 +219,7 @@ class MCTS():
 
   def start_the_game(self):
     '''
-    Aim - Complete MCTS iteration with all the process running for some fixed time
+    Aim - Complete MCTS iteration with all the process running for some fixed number of games
     '''
     self.initial_time = time.time()
     is_expanded = False
